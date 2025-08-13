@@ -78,7 +78,6 @@ EOT
 zpool import -f zpool || zpool create zpool /dev/disk/by-id/google-zfs || zpool status zpool
 zfs create zpool/images || zfs wait zpool/images
 
-exportfs  -o 'async,wdelay,hide,crossmnt,no_subtree_check,sec=sys,rw,secure,no_root_squash,no_all_squash' '*:/zpool'
 systemctl enable velda-apiserver
 systemctl start velda-apiserver
 
