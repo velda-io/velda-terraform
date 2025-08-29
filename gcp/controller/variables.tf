@@ -69,8 +69,14 @@ variable "extra_provisioners" {
   default     = []
 }
 
-variable "version" {
-  description = "The version of Velda to install. If not set, the latest version will be installed."
+variable "controller_config" {
+  description = "Overrides the controller configs."
+  type        = any
+  default     = null
+}
+
+variable "controller_version" {
+  description = "The version of Velda controller to install."
   type        = string
   default     = "latest"
 }

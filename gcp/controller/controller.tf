@@ -79,8 +79,7 @@ zpool import -f zpool || zpool create zpool /dev/disk/by-id/google-zfs || zpool 
 zfs create zpool/images || zfs wait zpool/images
 
 systemctl enable velda-apiserver
-systemctl start velda-apiserver
-
+systemctl start velda-apiserver&
 EOF
   }
 

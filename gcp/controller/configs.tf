@@ -1,5 +1,5 @@
 locals {
-  controller_config = yamlencode({
+  controller_config = yamlencode(var.controller_config != null ? var.controller_config : {
     server = {
       grpc_address = ":50051"
       http_address = ":8081"
