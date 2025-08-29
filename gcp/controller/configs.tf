@@ -10,7 +10,7 @@ locals {
         pool = "zpool"
       }
     }
-    provisioners = [
+    provisioners = concat([
       {
         gcs = {
           bucket          = google_storage_bucket.pool_configs.name
@@ -18,6 +18,6 @@ locals {
           update_interval = "60s"
         },
       }
-    ]
+    ], var.extra_provisioners)
   })
 }

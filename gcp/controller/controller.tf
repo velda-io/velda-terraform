@@ -56,7 +56,7 @@ resource "google_compute_instance" "controller" {
     provisioning_model  = "STANDARD"
   }
   service_account {
-    email = data.google_service_account.controller_sa.email
+    email = google_service_account.controller_sa.email
     scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
     ]

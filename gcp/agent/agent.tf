@@ -8,29 +8,41 @@ terraform {
 }
 
 locals {
-  has_gpu = var.accelerator_type != null && var.accelerator_count > 0
-  upgrade_script = <<-EOT
+  has_gpu        = var.accelerator_type != null && var.accelerator_count > 0
+  upgrade_script = var.upgrade_agent_on_start == null ? "" : <<-EOT
     echo "Upgrading agent on start..."
-    gsutil cp gs://novahub-release/client-oss-latest-amd64 velda-agent
-    chmod +x velda-agent
-    cp velda-agent /bin/velda-agent
-EOT
+    gsutil cp "${upgrade_agent_on_start}" velda
+    chmod +x velda
+    cp -f velda /bin/velda
+    EOT
   agent_config = yamlencode({
     broker = {
       address = "${var.controller_output.controller_ip}:50051"
     }
     sandbox_config = var.sandbox_config
-    daemon_config = var.daemon_config
-    pool = var.pool
+    daemon_config  = var.daemon_config
+    pool           = var.pool
   })
+
+  startup_script = <<-EOT
+    #!/bin/bash
+    ${local.upgrade_script}
+    mkdir -p /run/velda
+    cat <<EOF > /run/velda/velda.yaml
+    ${local.agent_config}
+    EOF
+    EOT
 }
+
 resource "google_compute_instance_template" "agent_template" {
   name_prefix    = "${var.controller_output.name}-agent-${var.pool}-"
   machine_type   = var.instance_type
   can_ip_forward = false
 
   disk {
-    source_image = var.agent_image_version != null ? "projects/velda-oss/global/images/velda-agent-${var.agent_image_version}" : "projects/velda-oss/global/images/family/velda-controller"
+    source_image = (var.agent_image_version != null ?
+      "projects/${var.image_project}/global/images/velda-agent-${var.agent_image_version}" :
+    "projects/${var.image_project}/global/images/family/velda-agent")
     auto_delete  = true
     disk_size_gb = 10
     disk_type    = "pd-standard"
@@ -67,17 +79,7 @@ resource "google_compute_instance_template" "agent_template" {
   }
 
   metadata = {
-      startup-script = <<-EOT
-      #!/bin/bash
-      set -euo pipefail
-      ${var.upgrade_agent_on_start ? local.upgrade_script : ""}
-      mkdir -p /tmp/agentdisk/0
-      mount -t nfs -o async,rw ${var.controller_output.controller_ip}:/zpool /tmp/agentdisk/0
-      mkdir -p /run/velda
-      cat <<EOF > /run/velda/velda.yaml
-      ${local.agent_config}
-      EOF
-      EOT
+    startup-script = local.startup_script
   }
 
   tags = ["${var.controller_output.name}-agent", "${var.pool}"]
@@ -85,7 +87,6 @@ resource "google_compute_instance_template" "agent_template" {
   lifecycle {
     create_before_destroy = true
   }
-
 }
 
 resource "google_compute_instance_group_manager" "agent_group" {

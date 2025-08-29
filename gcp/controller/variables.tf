@@ -56,3 +56,21 @@ variable "controller_image_version" {
   type        = string
   default     = null
 }
+
+variable "enable_monitoring" {
+  description = "Enable monitoring for the deployment."
+  type        = bool
+  default     = false
+}
+
+variable "extra_provisioners" {
+  description = "Additional provisioners to add to the controller config."
+  type        = list(any)
+  default     = []
+}
+
+variable "version" {
+  description = "The version of Velda to install. If not set, the latest version will be installed."
+  type        = string
+  default     = "latest"
+}

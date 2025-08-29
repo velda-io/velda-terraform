@@ -65,3 +65,9 @@ variable "upgrade_agent_on_start" {
   type        = bool
   default     = false
 }
+
+variable "image_project" {
+  description = "The project to use for the agent image"
+  type        = string
+  default     = "velda-oss"
+}
