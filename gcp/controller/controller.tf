@@ -9,6 +9,13 @@ resource "google_compute_address" "internal_ip" {
   address_type = "INTERNAL"
 }
 
+locals {
+  image_project  = local.enable_enterprise ? "velda-ent" : "velda-oss"
+  image_family   = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
+  release_bucket = local.enable_enterprise ? "velda-ent-release" : "velda-release"
+  download_url   = "gs://${local.release_bucket}/velda-${var.controller_version}-linux-amd64"
+}
+
 resource "google_compute_instance" "controller" {
   project = var.project
 
@@ -26,9 +33,10 @@ resource "google_compute_instance" "controller" {
     device_name = "${var.name}-bootdisk"
 
     initialize_params {
-      image = var.controller_image_version != null ? "projects/velda-oss/global/images/velda-controller-${var.controller_image_version}" : "projects/velda-oss/global/images/family/velda-controller"
-      size  = 10
-      type  = local.use_hyperdisk_boot_disk ? "hyperdisk-balanced" : "pd-standard"
+      image = (var.controller_image_version != null ? "projects/${local.image_project}/global/images/${local.image_family}-${var.controller_image_version}" :
+      "projects/${local.image_project}/global/images/family/${local.image_family}")
+      size = 10
+      type = local.use_hyperdisk_boot_disk ? "hyperdisk-balanced" : "pd-standard"
     }
 
     mode = "READ_WRITE"
@@ -40,6 +48,7 @@ resource "google_compute_instance" "controller" {
       for_each = var.use_nat_gateway ? [] : [1]
       content {
         network_tier = var.external_access.network_tier
+        nat_ip       = var.external_access.server_ip_address
       }
     }
 
@@ -66,22 +75,20 @@ resource "google_compute_instance" "controller" {
     "${var.name}-server",
   ]
 
-  metadata = {
+  metadata = merge({
     startup-script = <<EOF
 #!/bin/bash
 set -eux
-cat <<-EOT > /etc/velda.yaml
-${local.controller_config}
-EOT
 
-# ZFS setup
-zpool import -f zpool || zpool create zpool /dev/disk/by-id/google-zfs || zpool status zpool
-zfs create zpool/images || zfs wait zpool/images
+if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
+  gsutil cp ${local.download_url} velda
+  chmod +x velda
+  cp -f velda /opt/velda/bin/velda
+fi
 
-systemctl enable velda-apiserver
-systemctl start velda-apiserver&
+${module.config.setup_script}
 EOF
-  }
+    },module.config.extra_configs)
 
   zone = var.zone
 

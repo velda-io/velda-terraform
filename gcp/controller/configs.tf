@@ -1,23 +1,16 @@
-locals {
-  controller_config = yamlencode(var.controller_config != null ? var.controller_config : {
-    server = {
-      grpc_address = ":50051"
-      http_address = ":8081"
-    }
+module "config" {
+  source = "../../shared/configs"
 
-    storage = {
-      zfs = {
-        pool = "zpool"
-      }
-    }
-    provisioners = concat([
-      {
-        gcs = {
-          bucket          = google_storage_bucket.pool_configs.name
-          config_prefix   = "pools"
-          update_interval = "60s"
-        },
-      }
-    ], var.extra_provisioners)
-  })
+  name              = var.name
+  enterprise_config = var.enterprise_config
+  postgres_url      = local.postgres_url
+
+  provisioners = concat([{
+    gcs = {
+      bucket          = google_storage_bucket.pool_configs.name
+      config_prefix   = "pools"
+      update_interval = "60s"
+    },
+  }], var.extra_provisioners)
+  use_proxy = local.use_proxy
 }

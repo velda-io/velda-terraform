@@ -44,9 +44,14 @@ variable "use_nat_gateway" {
 }
 
 variable "external_access" {
-  description = "Options for public IP access."
+  description = "Options for public IP access. Default to disallow"
   type = object({
-    network_tier = optional(string, "PREMIUM")
+    server_ip_address     = optional(string, null), // If not set, default to ephermeral public IP.
+    network_tier          = optional(string, "PREMIUM")
+    use_proxy             = optional(bool, false)                  // Whether the client should use a proxy to connect to the agent.
+    allowed_source_ranges = optional(list(string), ["0.0.0.0/0"]) // Source ranges for the firewall rule
+    allowed_source_tags   = optional(list(string), [])            // Source tags for the firewall rule
+    setup_firewall_rule   = optional(bool, false)                  // Whether to setup firewall rule for the external access
   })
   default = {}
 }
@@ -79,4 +84,17 @@ variable "controller_version" {
   description = "The version of Velda controller to install."
   type        = string
   default     = "latest"
+}
+
+variable "enterprise_config" {
+  description = "Configs for enterprise features. The image must also use enterprise editions."
+  type = object({
+    domain = string
+    sql_db = optional(string)
+    https_certs = optional(object({
+      cert = string
+      key  = string
+    }))
+  })
+  default = null
 }

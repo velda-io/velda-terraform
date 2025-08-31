@@ -1,0 +1,160 @@
+admin:
+  access_log_path: /tmp/admin_access.log
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 9901 }
+
+static_resources:
+  listeners:
+  %{ if https_enabled }
+  # HTTP listener on port 80 for redirection
+  - name: listener_http
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 80
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: ingress_http
+          codec_type: AUTO
+          route_config:
+            name: redirect_route
+            virtual_hosts:
+            - name: redirect_host
+              domains:
+              - "*"
+              routes:
+              - match:
+                  prefix: "/"
+                redirect:
+                  scheme_redirect: https
+          http_filters:
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  - name: listener_https
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 443 }
+  %{ else }
+  - name: listener_http
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 80 }
+  %{ endif }
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: ingress_http
+          codec_type: AUTO
+          route_config:
+            name: local_route
+            virtual_hosts:
+              - name: grpc_web
+                domains: ["${domain}"]
+                routes:
+                  - match:
+                      prefix: "/api/"
+                    route:
+                      timeout: 0s
+                      cluster: grpc_service
+                      prefix_rewrite: "/"
+                  - match:
+                      prefix: "/velda."
+                    route:
+                      timeout: 0s
+                      cluster: grpc_service
+                  # Route all to localhost:8080
+                  - match:
+                      prefix: "/"
+                    route:
+                      cluster: apiserver_web_service
+              - name: reverse_proxy
+                domains: ["*.${domain}"]
+                routes:
+                  # Route all other requests to localhost:3000
+                  - match:
+                      prefix: "/"
+                    route:
+                      timeout: 0s
+                      cluster: proxy_service
+                      upgrade_configs:
+                      - upgrade_type: "websocket"
+
+          http_filters:
+          - name: envoy.filters.http.grpc_web
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_web.v3.GrpcWeb
+          - name: envoy.filters.http.cors
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  %{ if https_enabled }
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+          common_tls_context:
+            tls_certificates:
+            - certificate_chain:
+                filename: "/etc/envoy/cert.pem"  # Replace with your certificate path
+              private_key:
+                filename: "/etc/envoy/key.pem"   # Replace with your private key path
+            alpn_protocols:
+            - h2c
+            - h2
+            - http/1.1
+  %{ endif }
+
+  clusters:
+    # gRPC Backend (localhost:50051)
+    - name: grpc_service
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      lb_policy: ROUND_ROBIN
+
+      # HTTP/2 support
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
+      load_assignment:
+        cluster_name: grpc_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: host.docker.internal, port_value: 50051 }
+
+    # Proxy Service (localhost:8080)
+    - name: proxy_service
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: proxy_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: host.docker.internal, port_value: 8080 }
+
+    # Apiserver web Service (localhost:8081)
+    - name: apiserver_web_service
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: apiserver_web_service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: host.docker.internal, port_value: 8081 }
