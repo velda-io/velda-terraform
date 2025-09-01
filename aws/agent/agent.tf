@@ -17,15 +17,18 @@ locals {
     pool           = var.pool
   })
 
+  # Use bootcmd to run it earlier.
   cloud_init = yamlencode({
-    bootcmd = [
-      "mkdir -p /run/velda",
-      <<-EOT
+    bootcmd = concat(
+      var.init_script_content != null ? [["cloud-init-per", "once", "veldainit", "/bin/bash", "-c", var.init_script_content]] : [],
+      [
+        "mkdir -p /run/velda",
+        <<-EOT
       cat <<EOF > /run/velda/velda.yaml
       ${local.agent_config}
       EOF
       EOT
-    ]
+    ])
   })
   agent_version = var.agent_version != null ? var.agent_version : var.controller_output.agent_version
 }
