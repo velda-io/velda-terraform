@@ -100,7 +100,7 @@ resource "aws_iam_policy" "controller_policy" {
           "s3:GetObject",
         ],
         Resource = [
-          "arn:aws:s3:::velda-release/*"
+          "arn:aws:s3:::${local.release_bucket}/*"
         ]
       }
       ], local.agent_role_arn != null ? [
