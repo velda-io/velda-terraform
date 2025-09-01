@@ -6,7 +6,7 @@ locals {
   }))
   setup_configs = local.enable_enterprise ? jsonencode({
     instance_id = var.name
-    zfs_disks   = ["/dev/disk/by-id/google-zfs"]
+    zfs_disks   = var.zfs_disks
   }) : ""
 }
 

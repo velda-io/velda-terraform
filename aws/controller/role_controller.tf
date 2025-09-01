@@ -21,7 +21,7 @@ resource "aws_iam_policy" "controller_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17",
-    Statement = [
+    Statement = concat([
       {
         Effect = "Allow",
         Action = [
@@ -83,6 +83,8 @@ resource "aws_iam_policy" "controller_policy" {
       {
         Effect = "Allow",
         Action = [
+          "ec2:StopInstance",
+          "ec2:StartInstances",
           "ec2:TerminateInstances",
         ],
         Resource = "*",
@@ -95,22 +97,22 @@ resource "aws_iam_policy" "controller_policy" {
       {
         Effect = "Allow",
         Action = [
-          "iam:PassRole"
-        ],
-        Resource = [
-          local.agent_role_arn,
-        ]
-      },
-      {
-        Effect = "Allow",
-        Action = [
           "s3:GetObject",
         ],
         Resource = [
           "arn:aws:s3:::velda-release/*"
         ]
       }
-    ]
+      ], local.agent_role_arn != null ? [
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:PassRole"
+        ],
+        Resource = [
+          local.agent_role_arn,
+        ]
+    }] : [])
   })
 }
 

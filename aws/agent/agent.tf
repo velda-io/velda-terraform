@@ -27,11 +27,28 @@ locals {
       EOT
     ]
   })
+  agent_version = var.agent_version != null ? var.agent_version : var.controller_output.agent_version
+}
+
+data "aws_ami" "velda_controller" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["velda-agent-${local.agent_version}"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["686255976885"]
 }
 
 resource "aws_launch_template" "agent" {
   name          = "${var.controller_output.name}-agent-${var.pool}"
-  image_id      = var.agent_ami
+  image_id      = var.agent_ami != null ? var.agent_ami : data.aws_ami.velda_controller.id
   instance_type = var.instance_type
 
   network_interfaces {
@@ -52,9 +69,13 @@ resource "aws_launch_template" "agent" {
     hostname_type = "resource-name"
   }
 
-  iam_instance_profile {
-    name = var.controller_output.instance_profile
+  dynamic "iam_instance_profile" {
+    for_each = var.controller_output.instance_profile != "" ? [1] : []
+    content {
+      name = var.controller_output.instance_profile
+    }
   }
+
   tags = {
     VeldaApp = var.controller_output.name
     Pool     = var.pool

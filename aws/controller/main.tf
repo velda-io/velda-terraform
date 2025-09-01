@@ -6,3 +6,11 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  region = var.region
+}
+
+locals {
+  enable_enterprise = var.enterprise_config != null
+}

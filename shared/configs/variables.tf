@@ -31,3 +31,8 @@ variable "provisioners" {
   type        = any
   default     = []
 }
+
+variable "zfs_disks" {
+  description = "List of disks to use for zfs pool."
+  type        = list(string)
+}

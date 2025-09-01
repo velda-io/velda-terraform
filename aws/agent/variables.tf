@@ -10,6 +10,7 @@ variable "controller_output" {
     controller_ip      = string
     instance_profile   = string
     use_nat            = bool
+    agent_version      = string
   })
 }
 
@@ -20,9 +21,9 @@ variable "instance_type" {
 }
 
 variable "agent_ami" {
-  description = "The AMI for the agent"
+  description = "The AMI for the agent. Default to be determined by version."
   type        = string
-  default     = "ami-09eeb480639b7ca17"
+  default     = null
 }
 
 variable "pool" {
@@ -39,7 +40,7 @@ variable "autoscale_config" {
 variable "init_script_content" {
   description = "The initialization script for the agent"
   type        = string
-  default = null
+  default     = null
 }
 
 variable "sandbox_config" {
@@ -52,4 +53,10 @@ variable "daemon_config" {
   description = "Configuration for the Velda agent daemon"
   type        = any
   default     = {}
+}
+
+variable "agent_version" {
+  description = "The version of the Velda agent. Default to use Controller version."
+  type        = string
+  default     = null
 }

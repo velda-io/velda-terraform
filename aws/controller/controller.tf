@@ -17,11 +17,34 @@ resource "aws_volume_attachment" "controller_data_attach" {
   instance_id = aws_instance.controller.id
 }
 
+locals {
+  ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
+  release_bucket = local.enable_enterprise ? "velda-ent-release" : "velda-release"
+  download_url   = "s3://${local.release_bucket}/velda-${var.controller_version}-linux-amd64"
+  use_nat        = var.external_access.use_nat
+}
+
+data "aws_ami" "velda_controller" {
+  most_recent = true
+
+  filter {
+    name   = "tag:Name"
+    values = [local.ami_name]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["686255976885"]
+}
+
 resource "aws_instance" "controller" {
-  ami                         = var.controller_ami
+  ami                         = var.controller_ami != null ? var.controller_ami : data.aws_ami.velda_controller.id
   instance_type               = var.controller_machine_type
   subnet_id                   = var.controller_subnet_id
-  associate_public_ip_address = var.use_nat ? false : true
+  associate_public_ip_address = !local.use_nat || var.external_access.use_controller_external_ip
 
   root_block_device {
     volume_size = 10
@@ -35,27 +58,31 @@ resource "aws_instance" "controller" {
     Name = var.name
   }
 
-  user_data = templatefile("${path.module}/data/always_run.txt", {
+  user_data = base64encode(templatefile("${path.module}/data/always_run.txt", {
     script = <<-EOF
 #!/bin/bash
 set -eux
-cat <<-EOT > /etc/velda.yaml
-${local.controller_config}
-EOT
 
-# ZFS setup
-zpool import -f zpool || zpool create zpool /dev/xvdf || zpool status zpool
-zfs create zpool/images || zfs wait zpool/images
+if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
+  aws s3 cp ${local.download_url} velda
+  chmod +x velda
+  cp -f velda /opt/velda/bin/velda
+fi
 
-systemctl enable velda-apiserver
-systemctl start velda-apiserver&
+${module.config.setup_script}
 EOF
     }
-  )
+  ))
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_eip" "lb" {
+  count    = var.external_access.use_eip ? 1 : 0
+  instance = aws_instance.controller.id
+  domain   = "vpc"
 }
 
 resource "aws_iam_instance_profile" "controller_profile" {

@@ -13,4 +13,5 @@ module "config" {
     },
   }], var.extra_provisioners)
   use_proxy = local.use_proxy
+  zfs_disks = ["/dev/disk/by-id/google-zfs"]
 }
