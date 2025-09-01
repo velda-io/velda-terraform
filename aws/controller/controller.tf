@@ -75,6 +75,7 @@ EOF
   ))
 
   lifecycle {
+    ignore_changes = [ ami ]
     create_before_destroy = true
   }
 }
