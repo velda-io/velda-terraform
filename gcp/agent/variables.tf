@@ -10,6 +10,7 @@ variable "controller_output" {
     use_nat_gateway       = bool
     config_gcs_bucket     = string
     config_gcs_prefix     = string
+    default_agent_version = string
   })
 }
 
@@ -61,13 +62,7 @@ variable "daemon_config" {
 }
 
 variable "upgrade_agent_on_start" {
-  description = "Whether to upgrade the agent on start"
-  type        = bool
-  default     = false
-}
-
-variable "image_project" {
-  description = "The project to use for the agent image"
+  description = "gs:// URL to override the agent version and override the agent installed"
   type        = string
-  default     = "velda-oss"
+  default     = null
 }

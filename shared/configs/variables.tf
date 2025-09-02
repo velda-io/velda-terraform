@@ -12,7 +12,7 @@ variable "postgres_url" {
 variable "enterprise_config" {
   description = "Enterprise configuration"
   type = object({
-    domain      = string,
+    domain = string,
     https_certs = optional(object({
       cert = string,
       key  = string,
@@ -35,4 +35,22 @@ variable "provisioners" {
 variable "zfs_disks" {
   description = "List of disks to use for zfs pool."
   type        = list(string)
+}
+
+variable "base_instance_images" {
+  description = "List of base instance images."
+  type = list(object({
+    name        = string
+    docker_name = string
+  }))
+  default = [
+    {
+      name        = "ubuntu-24.04"
+      docker_name = "veldaio/base:24.04"
+    },
+    {
+      name        = "ubuntu-22.04"
+      docker_name = "veldaio/base-ubuntu-x86:22.04"
+    }
+  ]
 }

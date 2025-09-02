@@ -1,5 +1,5 @@
 resource "google_storage_bucket" "pool_configs" {
-  project = var.project
+  project  = var.project
   name     = "${var.project}-${var.name}-configs"
   location = local.region
 

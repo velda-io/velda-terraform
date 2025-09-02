@@ -48,10 +48,10 @@ variable "external_access" {
   type = object({
     server_ip_address     = optional(string, null), // If not set, default to ephermeral public IP.
     network_tier          = optional(string, "PREMIUM")
-    use_proxy             = optional(bool, false)                  // Whether the client should use a proxy to connect to the agent.
+    use_proxy             = optional(bool, false)                 // Whether the client should use a proxy to connect to the agent.
     allowed_source_ranges = optional(list(string), ["0.0.0.0/0"]) // Source ranges for the firewall rule
     allowed_source_tags   = optional(list(string), [])            // Source tags for the firewall rule
-    setup_firewall_rule   = optional(bool, false)                  // Whether to setup firewall rule for the external access
+    setup_firewall_rule   = optional(bool, true)                  // Whether to setup firewall rule for the external access
   })
   default = {}
 }
@@ -89,6 +89,7 @@ variable "enterprise_config" {
       cert = string
       key  = string
     }))
+    organization = string
   })
   default = null
 }

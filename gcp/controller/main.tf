@@ -12,10 +12,10 @@ locals {
 }
 
 data "google_compute_subnetwork" "selected" {
-  self_link   = "https://www.googleapis.com/compute/v1/${var.subnetwork}"
+  self_link = "https://www.googleapis.com/compute/v1/${var.subnetwork}"
 }
 
 locals {
-  network = data.google_compute_subnetwork.selected.network
+  network           = data.google_compute_subnetwork.selected.network
   enable_enterprise = var.enterprise_config != null
 }

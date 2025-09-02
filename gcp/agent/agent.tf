@@ -8,10 +8,14 @@ terraform {
 }
 
 locals {
-  has_gpu        = var.accelerator_type != null && var.accelerator_count > 0
-  upgrade_script = var.upgrade_agent_on_start == null ? "" : <<-EOT
+  image_version_raw = var.agent_image_version != null ? var.agent_image_version : (var.controller_output.default_agent_version != null ? var.controller_output.default_agent_version : "latest")
+  image_version     = replace(local.image_version_raw, ".", "-")
+  is_enterprise     = startswith(local.image_version, "ent-")
+  image_project     = local.is_enterprise ? "velda-ent" : "velda-oss"
+  has_gpu           = var.accelerator_type != null && var.accelerator_count > 0
+  upgrade_script    = var.upgrade_agent_on_start == null ? "" : <<-EOT
     echo "Upgrading agent on start..."
-    gsutil cp "${upgrade_agent_on_start}" velda
+    gsutil cp "${var.upgrade_agent_on_start}" velda
     chmod +x velda
     cp -f velda /bin/velda
     EOT
@@ -40,9 +44,9 @@ resource "google_compute_instance_template" "agent_template" {
   can_ip_forward = false
 
   disk {
-    source_image = (var.agent_image_version != null ?
-      "projects/${var.image_project}/global/images/velda-agent-${var.agent_image_version}" :
-    "projects/${var.image_project}/global/images/family/velda-agent")
+    source_image = (local.image_version != "latest" ?
+      "projects/${local.image_project}/global/images/velda-agent-${local.image_version}" :
+    "projects/${local.image_project}/global/images/family/velda-agent")
     auto_delete  = true
     disk_size_gb = 10
     disk_type    = "pd-standard"

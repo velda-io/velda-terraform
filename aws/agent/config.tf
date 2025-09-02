@@ -6,8 +6,8 @@ locals {
       {
         backend = {
           aws_launch_template = {
-            region               = var.controller_output.region
-            launch_template_name = "${var.controller_output.name}-agent-${var.pool}"
+            region                  = var.controller_output.region
+            launch_template_name    = "${var.controller_output.name}-agent-${var.pool}"
             use_instance_id_as_name = true
           }
         }

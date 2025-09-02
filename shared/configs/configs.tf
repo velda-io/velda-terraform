@@ -5,8 +5,9 @@ locals {
       https_enabled = var.enterprise_config.https_certs != null,
   }))
   setup_configs = local.enable_enterprise ? jsonencode({
-    instance_id = var.name
-    zfs_disks   = var.zfs_disks
+    instance_id          = var.name
+    zfs_disks            = var.zfs_disks
+    base_instance_images = var.base_instance_images
   }) : ""
 }
 
@@ -31,8 +32,8 @@ EOT
 
 output "extra_configs" {
   value = local.enable_enterprise ? tomap({
-      "envoy-config"   = jsonencode(yamldecode(local.envoy_config))
-      "velda-config"   = yamlencode(local.controller_config)
-      "velda-instance" = var.name
+    "envoy-config"   = jsonencode(yamldecode(local.envoy_config))
+    "velda-config"   = yamlencode(local.controller_config)
+    "velda-instance" = var.name
   }) : tomap({})
 }

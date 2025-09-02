@@ -22,7 +22,7 @@ resource "tls_self_signed_cert" "sp" {
 
   subject {
     common_name  = var.enterprise_config.domain
-    organization = "Your Company"
+    organization = var.enterprise_config.organization
   }
 
   validity_period_hours = 87600 # 10 years
@@ -92,7 +92,7 @@ resource "google_secret_manager_secret_iam_member" "jumphost_private_access" {
 }
 
 resource "google_secret_manager_secret" "auth_public_key" {
-  count = local.enable_enterprise ? 1 : 0
+  count     = local.enable_enterprise ? 1 : 0
   secret_id = "${var.name}-auth-public-key"
   replication {
     user_managed {
@@ -104,13 +104,13 @@ resource "google_secret_manager_secret" "auth_public_key" {
 }
 
 resource "google_secret_manager_secret_version" "auth_public_key" {
-  count = local.enable_enterprise ? 1 : 0
+  count       = local.enable_enterprise ? 1 : 0
   secret      = google_secret_manager_secret.auth_public_key[0].id
   secret_data = tls_private_key.auth_token_key[0].public_key_pem
 }
 
 resource "google_secret_manager_secret" "auth_private_key" {
-  count = local.enable_enterprise ? 1 : 0
+  count     = local.enable_enterprise ? 1 : 0
   secret_id = "${var.name}-auth-private-key"
   replication {
     user_managed {
@@ -122,7 +122,7 @@ resource "google_secret_manager_secret" "auth_private_key" {
 }
 
 resource "google_secret_manager_secret_version" "auth_private_key" {
-  count = local.enable_enterprise ? 1 : 0
+  count       = local.enable_enterprise ? 1 : 0
   secret      = google_secret_manager_secret.auth_private_key[0].id
   secret_data = tls_private_key.auth_token_key[0].private_key_pem
 }

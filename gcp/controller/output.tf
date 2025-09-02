@@ -14,6 +14,8 @@ output "agent_configs" {
 
     config_gcs_bucket = google_storage_bucket.pool_configs.name
     config_gcs_prefix = "pools/"
+
+    default_agent_version = var.controller_version
   }
 }
 

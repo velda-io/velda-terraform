@@ -88,7 +88,7 @@ fi
 
 ${module.config.setup_script}
 EOF
-    },module.config.extra_configs)
+  }, module.config.extra_configs)
 
   zone = var.zone
 

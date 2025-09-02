@@ -10,6 +10,6 @@ locals {
 
 resource "aws_iam_instance_profile" "agent_profile" {
   count = var.agent_role_override != null ? 1 : 0
-  name = "${var.name}-agent-profile"
-  role = local.agent_role_name
+  name  = "${var.name}-agent-profile"
+  role  = local.agent_role_name
 }
