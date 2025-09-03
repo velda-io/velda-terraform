@@ -25,7 +25,7 @@ module "pool_shell" {
   pool              = "shell"
   controller_output = module.velda_controller.agent_configs
 
-  instance_type       = "e2-medium"
+  instance_type = "e2-medium"
   autoscale_config = {
     max_agents         = 5
     min_idle_agents    = 0
@@ -34,4 +34,8 @@ module "pool_shell" {
     initial_delay      = "30s"
     sync_loop_interval = "60s"
   }
+}
+
+output "instruction" {
+  value = "To connect to the cluster, download Velda client from https://github.com/velda-io/velda/releases/latest and use the following command to connect: velda init --broker ${module.velda_controller.controller_ip}"
 }
