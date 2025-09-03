@@ -1,0 +1,41 @@
+apiVersion: velda.io/v1
+kind: AgentPool
+metadata:
+  namespace: default
+  name: shell
+spec:
+  autoscaler:
+    minIdle: 1
+    maxIdle: 2
+    maxReplicas: 4
+    idleDecaySecond: 60
+  template:
+    metadata:
+      name: agent-shell
+      namespace: default
+      labels:
+        app: velda-agent-shell
+        group: velda-agent
+        type: shell
+    spec:
+      containers:
+      - name: agent
+        image: veldaio/agent:dev-20250827-214358
+        args:
+          - '--pool=shell'
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: velda-config
+            mountPath: /run/velda
+        resources:
+          requests:
+            cpu: "0.1"
+            memory: 0.25Gi
+          limits:
+            cpu: 1
+            memory: 1Gi
+      volumes:
+        - name: velda-config
+          configMap:
+            name: velda-config

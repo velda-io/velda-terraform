@@ -16,6 +16,7 @@ module "velda_controller" {
   data_disk_size          = 100
   controller_machine_type = "e2-medium"
   data_disk_type          = "pd-ssd"
+  controller_version      = "v1.0.0-beta3"
 }
 
 module "pool_shell" {
@@ -25,7 +26,6 @@ module "pool_shell" {
   controller_output = module.velda_controller.agent_configs
 
   instance_type       = "e2-medium"
-  agent_image_version = "0-0-1-test1"
   autoscale_config = {
     max_agents         = 5
     min_idle_agents    = 0

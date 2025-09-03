@@ -22,3 +22,7 @@ output "agent_configs" {
 output "controller_sa" {
   value = google_service_account.controller_sa.email
 }
+
+output "controller_ip" {
+  value = google_compute_address.internal_ip.address
+}
