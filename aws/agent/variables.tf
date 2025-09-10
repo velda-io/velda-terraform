@@ -7,10 +7,13 @@ variable "controller_output" {
     vpc_id             = string
     subnet_ids         = list(string)
     security_group_ids = list(string)
-    controller_ip      = string
-    instance_profile   = string
-    use_nat            = bool
-    agent_version      = string
+    broker_info = object({
+      address        = string
+      public_address = optional(string)
+    })
+    instance_profile = string
+    use_nat          = bool
+    agent_version    = string
   })
 }
 

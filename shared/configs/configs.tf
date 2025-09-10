@@ -21,7 +21,7 @@ output "setup_script" {
   EOT
     : <<-EOT
 cat <<-EOF > /etc/velda.yaml
-${local.controller_config}
+${yamlencode(local.controller_config)}
 EOF
 # ZFS setup
 zpool import -f zpool || zpool create zpool /dev/disk/by-id/google-zfs || zpool status zpool

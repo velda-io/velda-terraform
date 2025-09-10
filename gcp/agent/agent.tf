@@ -20,9 +20,7 @@ locals {
     cp -f velda /bin/velda
     EOT
   agent_config = yamlencode({
-    broker = {
-      address = "${var.controller_output.controller_ip}:50051"
-    }
+    broker = var.controller_output.broker_info
     sandbox_config = var.sandbox_config
     daemon_config  = var.daemon_config
     pool           = var.pool

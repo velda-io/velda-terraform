@@ -5,7 +5,10 @@ variable "controller_output" {
     name                  = string
     zone                  = string
     subnetwork            = string
-    controller_ip         = string
+    broker_info = object({
+      address        = string
+      public_address = optional(string)
+    })
     agent_service_account = string
     use_nat_gateway       = bool
     config_gcs_bucket     = string
