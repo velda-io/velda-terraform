@@ -46,11 +46,11 @@ variable "base_instance_images" {
   default = [
     {
       name        = "ubuntu-24.04"
-      docker_name = "veldaio/base:24.04"
+      docker_name = "veldaio/base-ubuntu:24.04"
     },
     {
       name        = "ubuntu-22.04"
-      docker_name = "veldaio/base-ubuntu-x86:22.04"
+      docker_name = "veldaio/base-ubuntu:22.04"
     }
   ]
 }
