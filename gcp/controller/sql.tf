@@ -9,6 +9,7 @@ resource "random_password" "db_password" {
 
 resource "google_sql_database_instance" "postgres_instance" {
   count            = local.db_cnt
+  project          = var.project
   name             = "${var.name}-pg-instance"
   database_version = "POSTGRES_17"
   region           = local.region
@@ -31,12 +32,14 @@ resource "google_sql_database_instance" "postgres_instance" {
 
 resource "google_sql_database" "db" {
   count    = local.db_cnt
+  project  = var.project
   name     = "velda_db"
   instance = google_sql_database_instance.postgres_instance[0].name
 }
 
 resource "google_sql_user" "db_user" {
   count    = local.db_cnt
+  project  = var.project
   name     = "velda_user"
   instance = google_sql_database_instance.postgres_instance[0].name
   password = random_password.db_password[0].result

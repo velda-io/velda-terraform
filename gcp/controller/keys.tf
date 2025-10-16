@@ -38,6 +38,7 @@ resource "tls_self_signed_cert" "sp" {
 
 resource "google_secret_manager_secret" "jumphosts_public_key" {
   count     = local.use_proxy ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-jumphost-public"
 
   replication {
@@ -57,13 +58,16 @@ resource "google_secret_manager_secret_version" "jumphost_public_value" {
 
 resource "google_secret_manager_secret_iam_member" "jumphost_public_access" {
   count     = local.use_proxy ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.jumphosts_public_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"
 }
 
 resource "google_secret_manager_secret" "jumphosts_private_key" {
-  count     = local.use_proxy ? 1 : 0
+  count = local.use_proxy ? 1 : 0
+
+  project   = var.project
   secret_id = "${var.name}-jumphost-private"
 
   replication {
@@ -86,6 +90,7 @@ resource "google_secret_manager_secret_version" "jumphost_private_value" {
 
 resource "google_secret_manager_secret_iam_member" "jumphost_private_access" {
   count     = local.use_proxy ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.jumphosts_private_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"
@@ -93,6 +98,7 @@ resource "google_secret_manager_secret_iam_member" "jumphost_private_access" {
 
 resource "google_secret_manager_secret" "auth_public_key" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-auth-public-key"
   replication {
     user_managed {
@@ -111,6 +117,7 @@ resource "google_secret_manager_secret_version" "auth_public_key" {
 
 resource "google_secret_manager_secret" "auth_private_key" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-auth-private-key"
   replication {
     user_managed {
@@ -129,6 +136,7 @@ resource "google_secret_manager_secret_version" "auth_private_key" {
 
 resource "google_secret_manager_secret_iam_member" "auth_public_key_access" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.auth_public_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"
@@ -136,6 +144,7 @@ resource "google_secret_manager_secret_iam_member" "auth_public_key_access" {
 
 resource "google_secret_manager_secret_iam_member" "auth_private_key_access" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.auth_private_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"
@@ -143,6 +152,7 @@ resource "google_secret_manager_secret_iam_member" "auth_private_key_access" {
 
 resource "google_secret_manager_secret" "saml_sp_public_key" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-saml-sp-public-key"
   replication {
     user_managed {
@@ -161,6 +171,7 @@ resource "google_secret_manager_secret_version" "saml_sp_public_key" {
 
 resource "google_secret_manager_secret" "saml_sp_private_key" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-saml-sp-private-key"
   replication {
     user_managed {
@@ -178,6 +189,7 @@ resource "google_secret_manager_secret_version" "saml_sp_private_key" {
 }
 resource "google_secret_manager_secret_iam_member" "saml_sp_public_access" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.saml_sp_public_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"
@@ -185,6 +197,7 @@ resource "google_secret_manager_secret_iam_member" "saml_sp_public_access" {
 
 resource "google_secret_manager_secret_iam_member" "saml_sp_private_access" {
   count     = local.enable_enterprise ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.saml_sp_private_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"

@@ -20,7 +20,7 @@ locals {
     cp -f velda /bin/velda
     EOT
   agent_config = yamlencode({
-    broker = var.controller_output.broker_info
+    broker         = var.controller_output.broker_info
     sandbox_config = var.sandbox_config
     daemon_config  = var.daemon_config
     pool           = var.pool
@@ -37,6 +37,7 @@ locals {
 }
 
 resource "google_compute_instance_template" "agent_template" {
+  project        = var.controller_output.project
   name_prefix    = "${var.controller_output.name}-agent-${var.pool}-"
   machine_type   = var.instance_type
   can_ip_forward = false
@@ -92,6 +93,7 @@ resource "google_compute_instance_template" "agent_template" {
 }
 
 resource "google_compute_instance_group_manager" "agent_group" {
+  project            = var.controller_output.project
   name               = "${var.controller_output.name}-agent-${var.pool}"
   base_instance_name = "${var.controller_output.name}-agent"
   zone               = var.controller_output.zone

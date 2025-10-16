@@ -3,6 +3,7 @@ locals {
 }
 resource "google_secret_manager_secret" "certs_csr" {
   count     = local.https_enabled ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-certs-csr"
 
   replication {
@@ -22,6 +23,7 @@ resource "google_secret_manager_secret_version" "cert_csr_value" {
 
 resource "google_secret_manager_secret_iam_member" "cert_csr_access" {
   count     = local.https_enabled ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.certs_csr[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"
@@ -29,6 +31,7 @@ resource "google_secret_manager_secret_iam_member" "cert_csr_access" {
 
 resource "google_secret_manager_secret" "certs_key" {
   count     = local.https_enabled ? 1 : 0
+  project   = var.project
   secret_id = "${var.name}-certs-key"
 
   replication {
@@ -48,6 +51,7 @@ resource "google_secret_manager_secret_version" "cert_key_value" {
 
 resource "google_secret_manager_secret_iam_member" "cert_key_access" {
   count     = local.https_enabled ? 1 : 0
+  project   = var.project
   secret_id = google_secret_manager_secret.certs_key[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.controller_sa.email}"

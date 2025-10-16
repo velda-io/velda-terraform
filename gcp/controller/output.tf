@@ -5,10 +5,10 @@ locals {
 // Provide this output to the agent module.
 output "agent_configs" {
   value = {
-    project       = var.project
-    name          = var.name
-    zone          = var.zone
-    subnetwork    = var.subnetwork
+    project    = var.project
+    name       = var.name
+    zone       = var.zone
+    subnetwork = var.subnetwork
     broker_info = {
       address        = "${google_compute_address.internal_ip.address}:50051"
       public_address = var.enterprise_config != null ? "${local.public_address_protocol}://${var.enterprise_config.domain}" : ""

@@ -8,6 +8,7 @@ resource "google_compute_firewall" "allow_api_port" {
     ports    = ["80", "443", "2222"]
   }
 
+  project       = data.google_compute_subnetwork.selected.project
   source_ranges = var.external_access.allowed_source_ranges
   source_tags   = var.external_access.allowed_source_tags
   target_tags   = ["${var.name}-server"]
@@ -16,6 +17,7 @@ resource "google_compute_firewall" "allow_api_port" {
 resource "google_compute_firewall" "agent_access" {
   count   = var.external_access.setup_firewall_rule ? 1 : 0
   name    = "${var.name}-agent-access"
+  project = data.google_compute_subnetwork.selected.project
   network = local.network
 
   allow {
