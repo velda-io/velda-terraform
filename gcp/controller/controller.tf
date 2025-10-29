@@ -35,7 +35,7 @@ resource "google_compute_instance" "controller" {
     initialize_params {
       image = (var.controller_image_version != null ? "projects/${local.image_project}/global/images/${local.image_family}-${var.controller_image_version}" :
       "projects/${local.image_project}/global/images/family/${local.image_family}")
-      size = 10
+      size = 20
       type = local.use_hyperdisk_boot_disk ? "hyperdisk-balanced" : "pd-standard"
     }
 
