@@ -1,0 +1,54 @@
+#cloud-config
+# Cloud-init for Velda controller (Enterprise)
+# Installs docker, database tools, writes systemd services, runs install scripts
+users:
+  - name: ubuntu
+    gecos: Velda User
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [sudo, adm, docker]
+    shell: /bin/bash
+    ssh_authorized_keys: ${admin_ssh_key}
+
+package_update: true
+package_upgrade: false
+packages:
+  - docker.io
+  - zfsutils-linux
+  - nfs-kernel-server
+  - unzip
+  - postgresql-client
+  - jq
+  - curl
+
+write_files:
+
+%{if enable_https }
+  - path: /etc/velda/envoy/cert.pem
+    owner: root:root
+    permissions: '0600'
+    content: |
+      ${indent(6, https_cert)}
+  - path: /etc/velda/envoy/key.pem
+    owner: root:root
+    permissions: '0600'
+    content: |
+      ${indent(6, https_key)}
+%{ endif }
+  - path: /etc/velda/init.yaml
+    owner: root:root
+    permissions: '0644'
+    content: |
+      ${indent(6, init_config)}
+
+  - path: /etc/velda/config.yaml
+    owner: root:root
+    permissions: '0644'
+    content: |
+      ${indent(6, velda_config)}
+
+runcmd:
+  - curl "https://velda-release.s3.us-west-1.amazonaws.com/setup.sh" -o "/tmp/velda-setup.sh"
+%{ if postgres_password  != null }
+  - docker run -d --restart=always --name pg -e POSTGRES_PASSWORD=${postgres_password} -p 127.0.0.1:5432:5432 -v pg-data:/var/lib/postgresql/data postgres:17-alpine
+%{ endif}
+  - bash /tmp/velda-setup.sh /etc/velda/init.yaml
