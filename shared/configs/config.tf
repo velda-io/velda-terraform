@@ -7,7 +7,12 @@ locals {
         http_address = ":8081"
         },
         local.enable_enterprise ? { host = var.enterprise_config.domain } : {},
-        local.enable_enterprise ? { use_https = var.enterprise_config.https_certs != null } : {}
+        local.enable_enterprise ? { use_https = var.enterprise_config.https_certs != null } : {},
+        local.enable_enterprise ? { storage_grpc_endpoint = ":50052"} : {},
+        local.enable_enterprise ? var.enterprise_config.app_domain != null ? {
+          app_domain = var.enterprise_config.app_domain
+          app_listen_address = ":8082"
+        } : {} : {},
       )
 
       storage = {
@@ -43,5 +48,6 @@ locals {
         host_public_key  = "/run/velda/jumphost.pub"
       }
     } : {},
+    var.extra_config,
   ))
 }

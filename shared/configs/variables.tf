@@ -17,6 +17,7 @@ variable "enterprise_config" {
       cert = string,
       key  = string,
     }))
+    app_domain = optional(string)
   })
 }
 
@@ -53,4 +54,10 @@ variable "base_instance_images" {
       docker_name = "veldaio/base-ubuntu:22.04"
     }
   ]
+}
+
+variable "extra_config" {
+  description = "Extra configuration to add to the controller config"
+  type        = any
+  default     = {}
 }

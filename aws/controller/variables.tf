@@ -79,6 +79,7 @@ variable "enterprise_config" {
       key  = string
     }))
     organization = string
+    app_domain  = optional(string)
   })
   default = null
 }
@@ -103,4 +104,22 @@ variable "connection_source" {
     prefix_list_id               = optional(string),
     referenced_security_group_id = optional(string),
   }))
+}
+
+variable "extra_config" {
+  description = "Extra configuration to add to the controller config."
+  type        = any
+  default     = {}
+}
+
+variable "additional_controller_security_groups" {
+  description = "Additional security group ARNs to attach to the controller instance."
+  type        = list(string)
+  default     = []
+}
+
+variable "jumphost_public_key" {
+  description = "A list of SSH public keys to access controller only for network access."
+  type        = list(string)
+  default     = []
 }

@@ -14,6 +14,8 @@ module "config" {
   }], var.extra_provisioners)
   use_proxy = local.use_proxy
   zfs_disks = ["/dev/xvdf"]
+
+  extra_config = var.extra_config
 }
 
 resource "aws_ssm_parameter" "configs" {

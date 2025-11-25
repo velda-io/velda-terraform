@@ -19,8 +19,8 @@ resource "aws_db_instance" "postgres_instance" {
   username               = "velda"
   availability_zone      = var.zone
   password               = random_password.db_password[0].result
-  db_subnet_group_name   = aws_db_subnet_group.default.name
-  vpc_security_group_ids = [aws_security_group.db_sg.id]
+  db_subnet_group_name   = aws_db_subnet_group.default[0].name
+  vpc_security_group_ids = [aws_security_group.db_sg[0].id]
   storage_encrypted      = true
   skip_final_snapshot    = true
   lifecycle {
@@ -29,28 +29,35 @@ resource "aws_db_instance" "postgres_instance" {
 }
 
 resource "aws_db_subnet_group" "default" {
+  count       = local.db_cnt
   name_prefix = "${var.name}-db-subnet-group"
   subnet_ids  = var.subnet_ids
 }
 
 resource "aws_security_group" "db_sg" {
+  count       = local.db_cnt
   name        = "${var.name}-db-sg"
   description = "Database security group"
   vpc_id      = var.vpc_id
+}
 
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.controller_sg.id]
-  }
+resource "aws_vpc_security_group_ingress_rule" "db_ingress_controller" {
+  count       = local.db_cnt
+  ip_protocol = "tcp"
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  from_port                    = 5432
+  to_port                      = 5432
+  security_group_id            = aws_security_group.db_sg[0].id
+  referenced_security_group_id = aws_security_group.controller_sg.id
+}
+
+resource "aws_vpc_security_group_egress_rule" "db_egress_all" {
+  count             = local.db_cnt
+  ip_protocol       = "-1"
+  from_port         = -1
+  to_port           = -1
+  security_group_id = aws_security_group.db_sg[0].id
+  cidr_ipv4         = "0.0.0.0/0"
 }
 
 locals {

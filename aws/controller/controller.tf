@@ -9,6 +9,9 @@ resource "aws_ebs_volume" "controller_data" {
   tags = {
     Name = "${var.name}-data"
   }
+  lifecycle {
+    ignore_changes = [ snapshot_id ]
+  }
 }
 
 resource "aws_volume_attachment" "controller_data_attach" {
@@ -20,7 +23,7 @@ resource "aws_volume_attachment" "controller_data_attach" {
 locals {
   ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
   release_bucket = local.enable_enterprise ? "velda-ent-release" : "velda-release"
-  download_url   = "s3://${local.release_bucket}/velda-${var.controller_version}-linux-amd64"
+  download_url   = local.enable_enterprise ? "s3://${local.release_bucket}/velda-${var.controller_version}-linux-amd64" : "https://github.com/velda-io/velda/releases/download/${var.controller_version}/velda-${var.controller_version}-linux-amd64"
   use_nat        = var.external_access.use_nat
 }
 
@@ -52,21 +55,33 @@ resource "aws_instance" "controller" {
   }
 
   iam_instance_profile   = aws_iam_instance_profile.controller_profile.name
-  vpc_security_group_ids = [aws_security_group.controller_sg.id]
+  vpc_security_group_ids = concat([aws_security_group.controller_sg.id], var.additional_controller_security_groups)
 
   tags = {
     Name = var.name
   }
 
   user_data = base64encode(templatefile("${path.module}/data/always_run.txt", {
+    cloud_init= format("#cloud-config\n%s", yamlencode({
+      users: [
+        {
+          name: "velda_jump"
+          shell: "/usr/sbin/nologin"
+          ssh_authorized_keys: var.jumphost_public_key
+        }
+      ]
+      cloud_final_modules: [
+        ["scripts-user", "always"]
+      ]
+    }))
     script = <<-EOF
 #!/bin/bash
 set -eux
 
 if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
-  aws s3 cp ${local.download_url} velda
+  ${local.enable_enterprise ? "aws s3 cp ${local.download_url} velda" : "curl -Lo velda ${local.download_url}"}
   chmod +x velda
-  cp -f velda /opt/velda/bin/velda
+  cp -f velda /bin/velda
 fi
 
 ${module.config.setup_script}

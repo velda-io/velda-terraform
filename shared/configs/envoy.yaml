@@ -83,6 +83,19 @@ static_resources:
                       cluster: proxy_service
                       upgrade_configs:
                       - upgrade_type: "websocket"
+  %{ if app_domain != null }
+              - name: reverse_proxy
+                domains: ["*"]
+                routes:
+                  # Route all other requests to localhost:3000
+                  - match:
+                      prefix: "/"
+                    route:
+                      timeout: 0s
+                      cluster: app_proxy
+                      upgrade_configs:
+                      - upgrade_type: "websocket"
+  %{ endif }
 
           http_filters:
           - name: envoy.filters.http.grpc_web
@@ -158,3 +171,19 @@ static_resources:
               - endpoint:
                   address:
                     socket_address: { address: host.docker.internal, port_value: 8081 }
+
+  %{ if app_domain != null }
+
+    # App Proxy Service (localhost:8082)
+    - name: app_proxy
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: app_proxy
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: host.docker.internal, port_value: 8082 }
+  %{ endif }
