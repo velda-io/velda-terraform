@@ -1,5 +1,5 @@
 locals {
-  public_address_protocol = var.enterprise_config.https_certs != null ? "https" : "http"
+  public_address_protocol = var.enterprise_config != null ? var.enterprise_config.https_certs != null ? "https" : "http" : "http"
 }
 
 // Provide this output to the agent module.
