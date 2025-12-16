@@ -25,8 +25,27 @@ cat <<-EOF > /etc/velda.yaml
 ${yamlencode(local.controller_config)}
 EOF
 # ZFS setup
-zpool import -f zpool || zpool create zpool /dev/disk/by-id/google-zfs || zpool status zpool
+
+zfs_disks='${join(" ", var.zfs_disks)}'
+timeout=300
+interval=2
+start_time=$(date +%s)
+for disk in $zfs_disks; do
+  while [ ! -b "$disk" ]; do
+    current_time=$(date +%s)
+    elapsed=$((current_time - start_time))
+    if [ "$elapsed" -ge "$timeout" ]; then
+      echo "Timeout waiting for disk $disk to appear."
+      exit 1
+    fi
+    sleep $interval
+  done
+done
+
+zpool import -f zpool || zpool create zpool $${zfs_disks} || zpool status zpool
 zfs create zpool/images || zfs wait zpool/images
+systemctl enable velda-apiserver
+systemctl start velda-apiserver&
 EOT
   )
 }

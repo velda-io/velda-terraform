@@ -42,6 +42,19 @@ resource "aws_vpc_security_group_ingress_rule" "custom_port_ingress" {
   referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
 }
 
+resource "aws_vpc_security_group_ingress_rule" "jump_proxy_ssh_ingress" {
+  for_each                     = { for k, v in var.connection_source : k => v }
+  description                  = "Jump-proxy via SSH"
+  security_group_id            = aws_security_group.controller_sg.id
+  from_port                    = 22
+  to_port                      = 22
+  ip_protocol                  = "tcp"
+  cidr_ipv4                    = lookup(each.value, "cidr_ipv4", null)
+  cidr_ipv6                    = lookup(each.value, "cidr_ipv6", null)
+  prefix_list_id               = lookup(each.value, "prefix_list_id", null)
+  referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
+}
+
 resource "aws_vpc_security_group_ingress_rule" "grpc_ingress" {
   for_each                     = { for k, v in var.connection_source : k => v }
   description                  = "grpc"
