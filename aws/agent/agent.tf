@@ -61,7 +61,7 @@ resource "aws_launch_template" "agent" {
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {
-      volume_size = 8
+      volume_size = 20
       volume_type = "gp2"
     }
   }

@@ -31,3 +31,29 @@ output "db_security_group_arn" {
   description = "ARN of the database security group"
   value       = local.db_cnt == 0 ? null : aws_security_group.db_sg[0].id
 }
+
+output "controller_instance_id" {
+  description = "ID of the controller instance"
+  value       = aws_instance.controller.id
+}
+
+output "controller_network_interface_id" {
+  description = "Primary network interface ID of the controller instance"
+  value       = aws_instance.controller.primary_network_interface_id
+}
+
+
+output "controller_public_ip" {
+  description = "Public IP address of the controller instance (if assigned)"
+  value       = var.external_access.use_eip ? aws_eip.lb[0].public_ip : aws_instance.controller.public_ip
+}
+
+output "controller_security_group_id" {
+  description = "ID of the controller security group"
+  value       = aws_security_group.controller_sg.id
+}
+
+output "agent_security_group_id" {
+  description = "ID of the agent security group"
+  value       = aws_security_group.agent_sg.id
+}

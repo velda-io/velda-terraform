@@ -22,7 +22,7 @@ resource "aws_volume_attachment" "controller_data_attach" {
 
 locals {
   ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
-  release_bucket = local.enable_enterprise ? "velda-ent-release" : "velda-release"
+  release_bucket = "velda-release"
   download_url   = local.enable_enterprise || startswith(var.controller_version, "dev") ? "s3://${local.release_bucket}/velda-${var.controller_version}-linux-amd64" : "https://github.com/velda-io/velda/releases/download/${var.controller_version}/velda-${var.controller_version}-linux-amd64"
   use_nat        = var.external_access.use_nat
 }
@@ -48,6 +48,7 @@ resource "aws_instance" "controller" {
   instance_type               = var.controller_machine_type
   subnet_id                   = var.controller_subnet_id
   associate_public_ip_address = !local.use_nat || var.external_access.use_controller_external_ip
+  source_dest_check           = false
 
   root_block_device {
     volume_size = 10
