@@ -77,6 +77,15 @@ resource "aws_vpc_security_group_ingress_rule" "agent_ingress" {
   referenced_security_group_id = aws_security_group.agent_sg.id
 }
 
+resource "aws_vpc_security_group_ingress_rule" "fileserver_ingress" {
+  security_group_id            = aws_security_group.controller_sg.id
+  description                  = "file service from_agent"
+  from_port                    = 7655
+  to_port                      = 7655
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.agent_sg.id
+}
+
 data "aws_ec2_managed_prefix_list" "ec2_instance_connect" {
   name = "com.amazonaws.${var.region}.ec2-instance-connect"
 }
