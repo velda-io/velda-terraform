@@ -69,3 +69,27 @@ variable "upgrade_agent_on_start" {
   type        = string
   default     = null
 }
+
+variable "localssd_count" {
+  description = "Number of local SSDs to attach to each agent instance"
+  type        = number
+  default     = 0
+}
+
+variable "preemptible" {
+  description = "Whether to use preemptible instances for the agents"
+  type        = bool
+  default     = false
+}
+
+variable "boot_disk_size_gb" {
+  description = "Boot disk size in GB for agent instances"
+  type        = number
+  default     = 10
+}
+
+variable "boot_disk_type" {
+  description = "Boot disk type for agent instances (e.g. pd-standard, pd-ssd)"
+  type        = string
+  default     = "pd-standard"
+}
