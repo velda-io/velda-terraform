@@ -50,7 +50,7 @@ variable "admin_ssh_keys" {
 }
 
 variable "access_ssh_key" {
-  description = "SSH public keys to access Velda instsances"
+  description = "SSH public keys to access Velda instances"
   type        = string
   default     = null
 }
