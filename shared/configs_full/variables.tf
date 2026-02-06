@@ -7,9 +7,9 @@ variable "name" {
 variable "enterprise_config" {
   description = "Configs for enterprise features. The image must also use enterprise editions."
   type = object({
-    domain = string
+    domain           = string
     jump_server_addr = optional(string)
-    sql_db = optional(string)
+    sql_db           = optional(string)
     https_certs = optional(object({
       cert = string
       key  = string
@@ -47,6 +47,12 @@ variable "extra_config" {
 variable "admin_ssh_keys" {
   description = "List of admin SSH public keys to add to the controller"
   type        = string
+}
+
+variable "access_ssh_key" {
+  description = "SSH public keys to access Velda instsances"
+  type        = string
+  default     = null
 }
 
 variable "controller_version" {

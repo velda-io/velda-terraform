@@ -45,7 +45,16 @@ resource "nebius_compute_v1_instance" "controller" {
     }
   ]
 
-  network_interfaces = var.network_interface
+  # Use provided network interface(s) when set, otherwise create a default
+  # interface attached to `var.subnet_id` and request a public IP.
+  network_interfaces = var.network_interface != null ? var.network_interface : [
+    {
+      name              = "eth0"
+      subnet_id         = var.subnet_id
+      ip_address        = {}
+      public_ip_address = {}
+    }
+  ]
 
   service_account_id = nebius_iam_v1_service_account.controller_sa.id
 

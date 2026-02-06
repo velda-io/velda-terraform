@@ -1,8 +1,9 @@
 locals {
   cloud_init_yaml = yamldecode(templatefile("${path.module}/cloud-init-controller.tftpl", {
     admin_ssh_key     = var.admin_ssh_keys
+    access_ssh_key    = coalesce(var.access_ssh_key, var.admin_ssh_keys)
     enable_https      = var.enterprise_config != null && var.enterprise_config.https_certs != null
-    postgres_password = var.postgres_url != null ? null : random_password.postgres[0].result
+    postgres_password = var.enterprise_config == null || var.postgres_url != null ? null : random_password.postgres[0].result
     velda_config      = yamlencode(local.controller_config)
     init_config = jsonencode({
       instance_id          = var.name
