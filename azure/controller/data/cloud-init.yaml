@@ -1,0 +1,23 @@
+#cloud-config
+users:
+  - default
+  - name: velda_jump
+    shell: /usr/sbin/nologin
+    ssh_authorized_keys:
+%{ for key in velda_jump_keys ~}
+      - ${key}
+%{ endfor ~}
+  - name: velda
+    shell: /usr/bash
+    ssh_authorized_keys:
+%{ for key in velda_jump_keys ~}
+      - ${key}
+%{ endfor ~}
+
+
+cloud_final_modules:
+  - [scripts-user, always]
+
+runcmd:
+  - |
+    ${indent(4, setup_script)}
