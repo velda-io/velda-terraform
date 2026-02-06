@@ -44,8 +44,8 @@ variable "data_disk_type" {
 }
 
 variable "cloud_init" {
-    description = "Cloud-init configuration for the controller. Use config_full module to generate one."
-    type        = string
+  description = "Cloud-init configuration for the controller. Use config_full module to generate one."
+  type        = string
 }
 
 variable "sa_member_group" {
@@ -55,10 +55,11 @@ variable "sa_member_group" {
 
 variable "network_interface" {
   description = "Additional network interfaces to attach to the controller instance"
-  type        = list(object({
-    name               = string
-    subnet_id          = string
-    ip_address         = object({ allocation_id = string })
-    public_ip_address  = optional(object({ allocation_id = string }), null)
+  type = list(object({
+    name              = string
+    subnet_id         = string
+    ip_address        = object({ allocation_id = string })
+    public_ip_address = optional(object({ allocation_id = string }), null)
   }))
+  default = null
 }
