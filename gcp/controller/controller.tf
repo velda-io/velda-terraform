@@ -83,7 +83,7 @@ set -eux
 if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
   gsutil cp ${local.download_url} velda
   chmod +x velda
-  cp -f velda /bin/velda
+  cp -f velda /usr/bin/velda
 fi
 
 ${module.config.setup_script}

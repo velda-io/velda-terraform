@@ -80,6 +80,12 @@ variable "controller_version" {
   default     = "latest"
 }
 
+variable "default_agent_version" {
+  description = "The default version of Velda agent to use."
+  type        = string
+  default     = null
+}
+
 variable "enterprise_config" {
   description = "Configs for enterprise features. The image must also use enterprise editions."
   type = object({
@@ -92,4 +98,10 @@ variable "enterprise_config" {
     organization = string
   })
   default = null
+}
+
+variable "extra_config" {
+  description = "Extra configuration to add to the controller config."
+  type        = any
+  default     = {}
 }

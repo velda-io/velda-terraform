@@ -16,7 +16,7 @@ module "velda_controller" {
   data_disk_size          = 100
   controller_machine_type = "e2-medium"
   data_disk_type          = "pd-ssd"
-  controller_version      = "v1.0.0-beta2"
+  controller_version      = "v1.1.0-beta1"
 }
 
 module "pool_shell" {

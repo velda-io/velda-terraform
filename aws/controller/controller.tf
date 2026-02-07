@@ -82,7 +82,7 @@ set -eux
 if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
   ${local.enable_enterprise ? "aws s3 cp ${local.download_url} velda" : "curl -Lo velda ${local.download_url}"}
   chmod +x velda
-  cp -f velda /bin/velda
+  cp -f velda /usr/bin/velda
 fi
 
 ${module.config.setup_script}
