@@ -10,7 +10,7 @@ terraform {
 provider "nebius" {
 }
 variable "parent_id" {
-  description = "Nebius parent ID (e.g. project or folder ID) where the controller will be created"
+  description = "Nebius parent ID (e.g. project ID) where the controller will be created"
   type        = string
 }
 
@@ -40,7 +40,7 @@ module "config" {
   source = "../../shared/configs_full"
 
   name               = "velda-oss"
-  controller_version = "dev-20260206-002907"
+  controller_version = "v1.1.2"
   admin_ssh_keys     = var.admin_ssh_keys
   zfs_disks          = ["/dev/disk/by-id/virtio-data-disk"]
 
