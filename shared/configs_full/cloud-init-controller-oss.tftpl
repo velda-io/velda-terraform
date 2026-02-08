@@ -8,6 +8,14 @@ users:
     groups: [sudo, adm, docker]
     shell: /bin/bash
     ssh_authorized_keys: ${admin_ssh_key}
+  - name: velda
+    gecos: Velda User
+    shell: /bin/bash
+    ssh_authorized_keys: ${access_ssh_key}
+  - name: velda_jump
+    gecos: Velda Jump User
+    shell: /usr/sbin/nologin
+    ssh_authorized_keys: ${access_ssh_key}
 
 package_update: true
 package_upgrade: false
@@ -16,24 +24,11 @@ packages:
   - zfsutils-linux
   - nfs-kernel-server
   - unzip
-  - postgresql-client
   - jq
   - curl
 
 write_files:
 
-%{if enable_https }
-  - path: /etc/velda/envoy/cert.pem
-    owner: root:root
-    permissions: '0600'
-    content: |
-      ${indent(6, https_cert)}
-  - path: /etc/velda/envoy/key.pem
-    owner: root:root
-    permissions: '0600'
-    content: |
-      ${indent(6, https_key)}
-%{ endif }
   - path: /etc/velda/init.yaml
     owner: root:root
     permissions: '0644'
@@ -46,10 +41,22 @@ write_files:
     content: |
       ${indent(6, velda_config)}
 
+  - path: /etc/ssh/sshd_config.d/90-velda.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      Match User velda
+        AcceptEnv VELDA_INSTANCE
+        ForceCommand /usr/bin/velda run --ssh --
+
+  - path: /tmp/velda-setup.sh
+    owner: root:root
+    permissions: '0755'
+    content: |
+      ${indent(6, setup_script)}
+
 runcmd:
-  # Too big to store setup.sh in cloud-init
-  - curl "https://velda-release.s3.us-west-1.amazonaws.com/setup.sh" -o "/tmp/velda-setup.sh"
-%{ if postgres_password  != null }
-  - docker run -d --restart=always --name pg -e POSTGRES_PASSWORD=${postgres_password} -p 127.0.0.1:5432:5432 -v pg-data:/var/lib/postgresql/data postgres:17-alpine
-%{ endif}
+  - systemctl restart ssh
   - bash /tmp/velda-setup.sh /etc/velda/init.yaml
+  - sudo -u velda-admin velda init --broker http://localhost:50051
+  - sudo -u velda velda init --broker http://localhost:50051
