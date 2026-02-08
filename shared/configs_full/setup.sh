@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -eu
 # ZFS setup
 if ! [ "$(jq -r '.full_init' $1)" = "true" ]; then
   VELDA_INST=$(jq -r '.instance_id' $1) /opt/velda/bin/reload_config
@@ -43,6 +43,7 @@ zfs create zpool/images || zfs wait zpool/images
 
 if [ "$(jq -r '.full_init' $1)" = "true" ]; then
 
+  DOMAIN=$(jq -r '.domain' $1)
   # Create default config if not exists
   [ ! -e /etc/velda/config.yaml ] && cat << EOF > /etc/velda/config.yaml
 server:
@@ -95,7 +96,6 @@ EOF
   openssl ecparam -name prime256v1 -genkey -noout -out /etc/velda/auth_keys
   openssl ec -in /etc/velda/auth_keys -pubout -out /etc/velda/auth_keys.pub
 
-  DOMAIN=$(jq -r '.domain' $1)
   # Generate self-signed SAML key (ECDSA P256, 10 years)
   openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
     -keyout /etc/velda/saml.key -out /etc/velda/saml.cert \
