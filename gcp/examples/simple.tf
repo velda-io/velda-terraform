@@ -9,6 +9,7 @@ provider "google" {
 
 module "velda_controller" {
   source     = "github.com/velda-io/velda-terraform.git//gcp/controller?ref=main"
+  name       = "velda"
   project    = local.project
   zone       = local.zone
   subnetwork = "projects/${local.project}/regions/${local.region}/subnetworks/default"
@@ -16,7 +17,7 @@ module "velda_controller" {
   data_disk_size          = 100
   controller_machine_type = "e2-medium"
   data_disk_type          = "pd-ssd"
-  controller_version      = "v1.1.0-beta1"
+  controller_version      = "ent-v1.1.2"
 }
 
 module "pool_shell" {
