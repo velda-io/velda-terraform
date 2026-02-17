@@ -82,6 +82,9 @@ resource "aws_instance" "controller" {
           ssh_authorized_keys : var.access_public_keys
         }
       ],
+      packages: [
+        "docker.io"
+      ],
       write_files : [{
         path : "/etc/ssh/sshd_config.d/90-velda.conf"
         owner : "root:root"
@@ -96,6 +99,7 @@ resource "aws_instance" "controller" {
         "systemctl restart sshd",
         "sudo -u velda velda init --broker http://localhost:50051",
         "sudo -u velda-admin velda init --broker http://localhost:50051",
+        "usermod -aG docker velda-admin"
       ]
     }))
     script = <<-EOF
