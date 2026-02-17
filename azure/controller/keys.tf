@@ -62,7 +62,7 @@ resource "tls_private_key" "jumphost_key" {
   algorithm = "ED25519"
 }
 
-resource "azurerm_key_vault_secret" "jumphost_public_key" {
+resource "azurerm_key_vault_secret" "access_public_keys" {
   count        = local.use_proxy ? 1 : 0
   name         = "jumphost-public"
   value        = tls_private_key.jumphost_key[0].public_key_openssh

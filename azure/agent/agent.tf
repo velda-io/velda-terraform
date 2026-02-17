@@ -60,10 +60,10 @@ resource "azurerm_orchestrated_virtual_machine_scale_set" "agent" {
   os_profile {
     linux_configuration {
       disable_password_authentication = true
-      admin_username                  = var.admin_username
+      admin_username                  = "velda-admin"
 
       admin_ssh_key {
-        username   = var.admin_username
+        username   = "velda-admin"
         public_key = var.admin_ssh_public_key
       }
     }

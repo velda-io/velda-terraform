@@ -79,7 +79,7 @@ variable "enterprise_config" {
       key  = string
     }))
     organization = string
-    app_domain  = optional(string)
+    app_domain   = optional(string)
   })
   default = null
 }
@@ -118,8 +118,14 @@ variable "additional_controller_security_groups" {
   default     = []
 }
 
-variable "jumphost_public_key" {
+variable "access_public_keys" {
   description = "A list of SSH public keys to access controller only for network access."
+  type        = list(string)
+  default     = []
+}
+
+variable "admin_public_key" {
+  description = "A list of SSH public keys to access controller for both network and system access. If set, will also be added to the admin user which has sudo access."
   type        = list(string)
   default     = []
 }

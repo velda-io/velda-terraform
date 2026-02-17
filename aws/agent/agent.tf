@@ -9,7 +9,7 @@ terraform {
 
 locals {
   agent_config = yamlencode({
-    broker = var.controller_output.broker_info
+    broker         = var.controller_output.broker_info
     sandbox_config = var.sandbox_config
     daemon_config  = var.daemon_config
     pool           = var.pool
@@ -61,7 +61,7 @@ resource "aws_launch_template" "agent" {
   block_device_mappings {
     device_name = "/dev/sda1"
     ebs {
-      volume_size = 20
+      volume_size = var.boot_disk_size
       volume_type = "gp2"
     }
   }

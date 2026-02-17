@@ -2,7 +2,7 @@
 // You may use other deployment methods as needed, e.g. ArgoCD.
 
 provider "kubernetes" {
-  host                   = google_container_cluster.velda_k8s_cluster.endpoint
+  host = google_container_cluster.velda_k8s_cluster.endpoint
 
   token                  = data.google_client_config.default.access_token
   cluster_ca_certificate = base64decode(google_container_cluster.velda_k8s_cluster.master_auth[0].cluster_ca_certificate)

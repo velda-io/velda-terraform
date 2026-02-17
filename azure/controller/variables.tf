@@ -124,16 +124,10 @@ variable "additional_controller_nsg_ids" {
   default     = []
 }
 
-variable "jumphost_public_keys" {
+variable "access_public_keyss" {
   description = "A list of SSH public keys to access controller only for network access."
   type        = list(string)
   default     = []
-}
-
-variable "admin_username" {
-  description = "Admin username for the controller VM"
-  type        = string
-  default     = "velda-admin"
 }
 
 variable "controller_ssh_public_key" {

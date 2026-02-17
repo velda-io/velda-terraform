@@ -10,7 +10,7 @@ resource "aws_ebs_volume" "controller_data" {
     Name = "${var.name}-data"
   }
   lifecycle {
-    ignore_changes = [ snapshot_id ]
+    ignore_changes = [snapshot_id]
   }
 }
 
@@ -63,16 +63,39 @@ resource "aws_instance" "controller" {
   }
 
   user_data = base64encode(templatefile("${path.module}/data/always_run.txt", {
-    cloud_init= format("#cloud-config\n%s", yamlencode({
-      users: [
+    cloud_init = format("#cloud-config\n%s", yamlencode(local.enable_enterprise ? tomap({}) : {
+      users : [
         {
-          name: "velda_jump"
-          shell: "/usr/sbin/nologin"
-          ssh_authorized_keys: var.jumphost_public_key
+          name : "velda_jump"
+          shell : "/usr/sbin/nologin"
+          ssh_authorized_keys : var.access_public_keys
+        },
+        {
+          name : "velda-admin"
+          shell : "/bin/bash"
+          ssh_authorized_keys : var.admin_public_key
+          sudo : ["ALL=(ALL) NOPASSWD:ALL"]
+        },
+        {
+          name : "velda"
+          shell : "/bin/bash"
+          ssh_authorized_keys : var.access_public_keys
         }
-      ]
-      cloud_final_modules: [
-        ["scripts-user", "always"]
+      ],
+      write_files : [{
+        path : "/etc/ssh/sshd_config.d/90-velda.conf"
+        owner : "root:root"
+        permissions : "0644"
+        content : <<-EOF
+        Match User velda
+          AcceptEnv VELDA_INSTANCE
+          ForceCommand /usr/bin/velda run --ssh --
+        EOF
+      }],
+      runcmd : [
+        "systemctl restart sshd",
+        "sudo -u velda velda init --broker http://localhost:50051",
+        "sudo -u velda-admin velda init --broker http://localhost:50051",
       ]
     }))
     script = <<-EOF

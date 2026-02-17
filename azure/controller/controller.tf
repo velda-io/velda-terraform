@@ -74,14 +74,14 @@ resource "azurerm_linux_virtual_machine" "controller" {
   location            = var.location
   resource_group_name = var.resource_group_name
   size                = var.controller_vm_size
-  admin_username      = var.admin_username
+  admin_username      = "velda-admin"
 
   network_interface_ids = [
     azurerm_network_interface.controller_nic.id
   ]
 
   admin_ssh_key {
-    username   = var.admin_username
+    username   = "velda-admin"
     public_key = var.controller_ssh_public_key != null ? var.controller_ssh_public_key : tls_private_key.controller_ssh[0].public_key_openssh
   }
 
@@ -105,12 +105,12 @@ resource "azurerm_linux_virtual_machine" "controller" {
   }
 
   identity {
-    type = "UserAssigned"
+    type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.controller_identity.id]
   }
 
   custom_data = base64encode(templatefile("${path.module}/data/cloud-init.yaml", {
-    velda_jump_keys = var.jumphost_public_keys
+    velda_jump_keys = var.access_public_keyss
     setup_script    = <<-EOF
 #!/bin/bash
 set -eux

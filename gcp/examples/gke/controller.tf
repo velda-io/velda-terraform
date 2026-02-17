@@ -1,7 +1,7 @@
 locals {
-  project = "<Project-ID>" # Update to your GCP project
-  region  = "us-central1"
-  zone    = "us-central1-a"
+  project          = "<Project-ID>" # Update to your GCP project
+  region           = "us-central1"
+  zone             = "us-central1-a"
   gke_cluster_name = "<cluster-name>"
 }
 provider "google" {
@@ -14,17 +14,17 @@ module "controller" {
   zone       = local.zone
   subnetwork = "projects/${local.project}/regions/${local.region}/subnetworks/default"
 
-  data_disk_size = 100
+  data_disk_size          = 100
   controller_machine_type = "e2-medium"
-  data_disk_type = "pd-ssd"
+  data_disk_type          = "pd-ssd"
 
   extra_provisioners = [
     {
       kubernetes = {
         namespace = "default"
         gke = {
-          project    = local.project
-          location   = local.zone
+          project      = local.project
+          location     = local.zone
           cluster_name = local.gke_cluster_name
         }
       }

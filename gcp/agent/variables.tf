@@ -1,10 +1,10 @@
 variable "controller_output" {
   description = "The output of the controller module for agent"
   type = object({
-    project               = string
-    name                  = string
-    zone                  = string
-    subnetwork            = string
+    project    = string
+    name       = string
+    zone       = string
+    subnetwork = string
     broker_info = object({
       address        = string
       public_address = optional(string)

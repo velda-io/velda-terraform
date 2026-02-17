@@ -14,15 +14,15 @@ module "controller" {
   controller_version      = "ent-v1.1.2"
 
   enterprise_config = {
-    domain = "gcp.velda.cloud" # Update this to your domain
+    domain       = "gcp.velda.cloud" # Update this to your domain
     organization = "Velda Inc"
   }
   external_access = {
     setup_firewall_rule = true
-    use_proxy = true
-    use_nat = false
+    use_proxy           = true
+    use_nat             = false
   }
-  
+
   use_nat_gateway = false
 }
 

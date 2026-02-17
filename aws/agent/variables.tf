@@ -63,3 +63,9 @@ variable "agent_version" {
   type        = string
   default     = null
 }
+
+variable "boot_disk_size" {
+  description = "The boot disk size of the agent. Note this may be used for host-volume or scratch volume."
+  type        = number
+  default     = 8
+}
