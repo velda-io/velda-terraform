@@ -23,7 +23,7 @@ resource "aws_volume_attachment" "controller_data_attach" {
 locals {
   ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
   release_bucket = "velda-release"
-  download_url   = local.enable_enterprise || startswith(var.controller_version, "dev") ? "s3://${local.release_bucket}/velda-${var.controller_version}-linux-amd64" : "https://github.com/velda-io/velda/releases/download/${var.controller_version}/velda-${var.controller_version}-linux-amd64"
+  download_url   = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
   use_nat        = var.external_access.use_nat
 }
 
@@ -107,7 +107,7 @@ resource "aws_instance" "controller" {
 set -eux
 
 if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
-  ${local.enable_enterprise ? "aws s3 cp ${local.download_url} velda" : "curl -Lo velda ${local.download_url}"}
+  "curl -fsSL -o velda ${local.download_url}"}
   chmod +x velda
   cp -f velda /usr/bin/velda
 fi

@@ -24,7 +24,7 @@ resource "azurerm_managed_disk" "controller_data" {
 locals {
   image_name      = local.enable_enterprise ? "velda-controller-ent" : "velda-${var.controller_version}"
   release_storage = "veldarelease"
-  download_url    = local.enable_enterprise || startswith(var.controller_version, "dev") ? "https://velda-release.s3.us-west-1.amazonaws.com/velda-${var.controller_version}-linux-amd64" : "https://github.com/velda-io/velda/releases/download/${var.controller_version}/velda-${var.controller_version}-linux-amd64"
+  download_url    = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
   use_nat         = var.external_access.use_nat_gateway
 }
 

@@ -7,11 +7,7 @@ MARKER=/etc/velda/installed
 
 VELDA_VERSION=$(jq -r '.velda_version' $1)
 if ! (command -v velda) || [ "$(velda version)" != "${VELDA_VERSION}" ]; then
-  if [[ "$VELDA_VERSION" != dev* && "$VELDA_VERSION" != v0* ]]; then
-    curl -L "https://github.com/velda-io/velda/releases/download/${VELDA_VERSION}/velda-${VELDA_VERSION}-linux-amd64" -o /tmp/velda
-  else
-    curl -L "https://velda-release.s3.us-west-1.amazonaws.com/velda-${VELDA_VERSION}-linux-amd64" -o /tmp/velda
-  fi
+  curl -fsSL -o /tmp/velda "https://releases.velda.io/velda-${VELDA_VERSION}-linux-amd64"
   chmod +x /tmp/velda
   mv /tmp/velda /usr/bin/velda
 fi

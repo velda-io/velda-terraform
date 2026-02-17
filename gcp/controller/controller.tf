@@ -13,7 +13,7 @@ locals {
   image_project  = local.enable_enterprise ? "velda-ent" : "velda-oss"
   image_family   = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
   release_bucket = local.enable_enterprise ? "velda-ent-release" : "velda-release"
-  download_url   = "gs://${local.release_bucket}/velda-${var.controller_version}-linux-amd64"
+  download_url   = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
 }
 
 resource "google_compute_instance" "controller" {
@@ -81,7 +81,7 @@ resource "google_compute_instance" "controller" {
 set -eux
 
 if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
-  gsutil cp ${local.download_url} velda
+  curl -fsSL -o velda ${local.download_url}
   chmod +x velda
   cp -f velda /usr/bin/velda
 fi

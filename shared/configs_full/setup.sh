@@ -16,7 +16,7 @@ fi
 if [ "$(jq -r '.full_init' $1)" = "true" ]; then
   VELDA_VERSION=$(jq -r '.velda_version' $1)
   if ! (command -v velda) || [ "$(velda version)" != "${VELDA_VERSION}" ]; then
-    curl "https://velda-release.s3.us-west-1.amazonaws.com/velda-${VELDA_VERSION}-linux-amd64" -o /tmp/velda
+    curl -fsSL "https://releases.velda.io/velda-${VELDA_VERSION}-linux-amd64" -o /tmp/velda
     chmod +x /tmp/velda
     mv /tmp/velda /usr/bin/velda
   fi
