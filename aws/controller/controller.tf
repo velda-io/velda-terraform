@@ -22,7 +22,6 @@ resource "aws_volume_attachment" "controller_data_attach" {
 
 locals {
   ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
-  release_bucket = "velda-release"
   download_url   = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
   use_nat        = var.external_access.use_nat
 }
@@ -73,7 +72,7 @@ resource "aws_instance" "controller" {
         {
           name : "velda-admin"
           shell : "/bin/bash"
-          ssh_authorized_keys : var.admin_public_key
+          ssh_authorized_keys : var.admin_public_keys
           sudo : ["ALL=(ALL) NOPASSWD:ALL"]
         },
         {
@@ -85,6 +84,7 @@ resource "aws_instance" "controller" {
       packages: [
         "docker.io"
       ],
+      update_packages: true,
       write_files : [{
         path : "/etc/ssh/sshd_config.d/90-velda.conf"
         owner : "root:root"
@@ -96,7 +96,7 @@ resource "aws_instance" "controller" {
         EOF
       }],
       runcmd : [
-        "systemctl restart sshd",
+        "systemctl restart ssh",
         "sudo -u velda velda init --broker http://localhost:50051",
         "sudo -u velda-admin velda init --broker http://localhost:50051",
         "usermod -aG docker velda-admin"
@@ -107,7 +107,7 @@ resource "aws_instance" "controller" {
 set -eux
 
 if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
-  "curl -fsSL -o velda ${local.download_url}"}
+  curl -fsSL -o velda ${local.download_url}
   chmod +x velda
   cp -f velda /usr/bin/velda
 fi

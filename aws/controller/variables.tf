@@ -91,7 +91,7 @@ variable "external_access" {
     ip_address                 = optional(string, null), // If not set, default to ephermeral public IP.
     use_eip                    = optional(bool, false),  // Whether to use EIP for the controller.
     use_nat                    = optional(bool, false),  // Whether to use NAT in the network.
-    use_controller_external_ip = optional(bool, false),  // Whether controller has external IP.
+    use_controller_external_ip = optional(bool, false),  // Whether controller has external IP. Always true if use_nat is false.
   })
   default = {}
 }
@@ -124,7 +124,7 @@ variable "access_public_keys" {
   default     = []
 }
 
-variable "admin_public_key" {
+variable "admin_public_keys" {
   description = "A list of SSH public keys to access controller for both network and system access. If set, will also be added to the admin user which has sudo access."
   type        = list(string)
   default     = []

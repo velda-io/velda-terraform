@@ -94,15 +94,6 @@ resource "aws_iam_policy" "controller_policy" {
           }
         }
       },
-      {
-        Effect = "Allow",
-        Action = [
-          "s3:GetObject",
-        ],
-        Resource = [
-          "arn:aws:s3:::${local.release_bucket}/*"
-        ]
-      }
       ], local.agent_role_arn != null ? [
       {
         Effect = "Allow",

@@ -48,7 +48,7 @@ write_files:
 
 runcmd:
   # Too big to store setup.sh in cloud-init
-  - curl "https://velda-release.s3.us-west-1.amazonaws.com/setup.sh" -o "/tmp/velda-setup.sh"
+  - curl "https://releases.velda.io/setup.sh" -o "/tmp/velda-setup.sh"
 %{ if postgres_password  != null }
   - docker run -d --restart=always --name pg -e POSTGRES_PASSWORD=${postgres_password} -p 127.0.0.1:5432:5432 -v pg-data:/var/lib/postgresql/data postgres:17-alpine
 %{ endif}
