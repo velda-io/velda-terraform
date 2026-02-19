@@ -62,7 +62,7 @@ resource "aws_instance" "controller" {
   }
 
   user_data = base64encode(templatefile("${path.module}/data/always_run.txt", {
-    cloud_init = format("#cloud-config\n%s", yamlencode(local.enable_enterprise ? tomap({}) : {
+    cloud_init = format("#cloud-config\n%s", yamlencode(local.enable_enterprise ? tomap({}) : tomap({
       users : [
         {
           name : "velda_jump"
@@ -101,7 +101,7 @@ resource "aws_instance" "controller" {
         "sudo -u velda-admin velda init --broker http://localhost:50051",
         "usermod -aG docker velda-admin"
       ]
-    }))
+    })))
     script = <<-EOF
 #!/bin/bash
 set -eux
