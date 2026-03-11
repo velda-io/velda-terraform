@@ -42,7 +42,6 @@ output "controller_network_interface_id" {
   value       = aws_instance.controller.primary_network_interface_id
 }
 
-
 output "controller_public_ip" {
   description = "Public IP address of the controller instance (if assigned)"
   value       = var.external_access.use_eip ? aws_eip.lb[0].public_ip : aws_instance.controller.public_ip
@@ -56,4 +55,9 @@ output "controller_security_group_id" {
 output "agent_security_group_id" {
   description = "ID of the agent security group"
   value       = aws_security_group.agent_sg.id
+}
+
+output "controller_role_id" {
+  description = "IAM Role ID for the controller"
+  value       = aws_iam_role.controller_role.id
 }
