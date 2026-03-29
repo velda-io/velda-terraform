@@ -21,7 +21,7 @@ resource "aws_volume_attachment" "controller_data_attach" {
 }
 
 locals {
-  ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller"
+  ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller-${var.controller_version}"
   download_url   = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
   use_nat        = var.external_access.use_nat
 }
@@ -30,7 +30,7 @@ data "aws_ami" "velda_controller" {
   most_recent = true
 
   filter {
-    name   = "tag:Name"
+    name   = "name"
     values = [local.ami_name]
   }
 
@@ -62,7 +62,7 @@ resource "aws_instance" "controller" {
   }
 
   user_data = base64encode(templatefile("${path.module}/data/always_run.txt", {
-    cloud_init = format("#cloud-config\n%s", yamlencode(local.enable_enterprise ? tomap({}) : tomap({
+    cloud_init = format("#cloud-config\n%s", local.enable_enterprise ? "" : yamlencode({
       users : [
         {
           name : "velda_jump"
@@ -101,7 +101,7 @@ resource "aws_instance" "controller" {
         "sudo -u velda-admin velda init --broker http://localhost:50051",
         "usermod -aG docker velda-admin"
       ]
-    })))
+    }))
     script = <<-EOF
 #!/bin/bash
 set -eux
