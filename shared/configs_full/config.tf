@@ -1,5 +1,15 @@
+resource "random_password" "postgres" {
+  count   = var.enterprise_config != null && var.postgres_url == null ? 1 : 0
+  length  = 16
+  special = false
+  upper   = true
+  lower   = true
+  numeric = true
+}
+
 locals {
   enable_enterprise = var.enterprise_config != null
+  postgres_url      = var.enterprise_config == null || var.postgres_url != null ? var.postgres_url : "postgres://postgres:${random_password.postgres[0].result}@localhost:5432/postgres?sslmode=disable"
   controller_config = (merge(
     {
       server = merge({

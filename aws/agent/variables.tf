@@ -24,9 +24,9 @@ variable "instance_type" {
 }
 
 variable "agent_ami" {
-  description = "The AMI for the agent. Default to be determined by version."
+  description = "The AMI for the agent. Default to init from AWS default ML image. If set to null, will infer from version number"
   type        = string
-  default     = null
+  default     = "aws-ml"
 }
 
 variable "pool" {
@@ -67,5 +67,11 @@ variable "agent_version" {
 variable "boot_disk_size" {
   description = "The boot disk size of the agent. Note this may be used for host-volume or scratch volume."
   type        = number
-  default     = 8
+  default     = 100
+}
+
+variable "max_stopped_instance" {
+  description = "The maximum number of stopped instances for the agent for faster startup"
+  type        = number
+  default     = 0
 }

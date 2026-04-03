@@ -5,17 +5,21 @@ module "config" {
   enterprise_config = var.enterprise_config
   postgres_url      = local.postgres_url
 
-  provisioners = concat([{
-    aws = {
-      region          = var.region
-      config_prefix   = "/${var.name}/pools"
-      update_interval = "60s"
-    }
-  }], var.extra_provisioners)
   use_proxy = local.use_proxy
   zfs_disks = ["/dev/xvdf"]
 
-  extra_config = var.extra_config
+  controller_version = var.controller_version
+  admin_ssh_keys     = var.admin_public_keys
+
+  extra_config = merge(var.extra_config, {
+    provisioners = concat([{
+      aws = {
+        region          = var.region
+        config_prefix   = "/${var.name}/pools"
+        update_interval = "60s"
+      }
+    }], var.extra_provisioners)
+  })
 }
 
 resource "aws_ssm_parameter" "configs" {

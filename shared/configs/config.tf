@@ -21,7 +21,7 @@ locals {
           pool = "zpool"
         }
       }
-      provisioners = var.provisioners
+      provisioners = concat(var.provisioners, lookup(var.extra_config, "provisioners", []))
     },
     local.enable_enterprise ? {
       database = {

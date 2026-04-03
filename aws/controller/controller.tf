@@ -21,9 +21,8 @@ resource "aws_volume_attachment" "controller_data_attach" {
 }
 
 locals {
-  ami_name       = local.enable_enterprise ? "velda-controller-ent" : "velda-controller-${var.controller_version}"
-  download_url   = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
-  use_nat        = var.external_access.use_nat
+  download_url = "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
+  use_nat      = var.external_access.use_nat
 }
 
 data "aws_ami" "velda_controller" {
@@ -31,7 +30,7 @@ data "aws_ami" "velda_controller" {
 
   filter {
     name   = "name"
-    values = [local.ami_name]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
 
   filter {
@@ -39,7 +38,7 @@ data "aws_ami" "velda_controller" {
     values = ["hvm"]
   }
 
-  owners = ["686255976885"]
+  owners = ["099720109477"]
 }
 
 resource "aws_instance" "controller" {
@@ -61,61 +60,7 @@ resource "aws_instance" "controller" {
     Name = var.name
   }
 
-  user_data = base64encode(templatefile("${path.module}/data/always_run.txt", {
-    cloud_init = format("#cloud-config\n%s", local.enable_enterprise ? "" : yamlencode({
-      users : [
-        {
-          name : "velda_jump"
-          shell : "/usr/sbin/nologin"
-          ssh_authorized_keys : var.access_public_keys
-        },
-        {
-          name : "velda-admin"
-          shell : "/bin/bash"
-          ssh_authorized_keys : var.admin_public_keys
-          sudo : ["ALL=(ALL) NOPASSWD:ALL"]
-        },
-        {
-          name : "velda"
-          shell : "/bin/bash"
-          ssh_authorized_keys : var.access_public_keys
-        }
-      ],
-      packages: [
-        "docker.io"
-      ],
-      update_packages: true,
-      write_files : [{
-        path : "/etc/ssh/sshd_config.d/90-velda.conf"
-        owner : "root:root"
-        permissions : "0644"
-        content : <<-EOF
-        Match User velda
-          AcceptEnv VELDA_INSTANCE
-          ForceCommand /usr/bin/velda run --ssh --
-        EOF
-      }],
-      runcmd : [
-        "systemctl restart ssh",
-        "sudo -u velda velda init --broker http://localhost:50051",
-        "sudo -u velda-admin velda init --broker http://localhost:50051",
-        "usermod -aG docker velda-admin"
-      ]
-    }))
-    script = <<-EOF
-#!/bin/bash
-set -eux
-
-if ! [ -e $(which velda) ] || [ "$(velda version)" != "${var.controller_version}" ]; then
-  curl -fsSL -o velda ${local.download_url}
-  chmod +x velda
-  cp -f velda /usr/bin/velda
-fi
-
-${module.config.setup_script}
-EOF
-    }
-  ))
+  user_data = base64encode(module.config.cloud_init)
 
   lifecycle {
     ignore_changes        = [ami]

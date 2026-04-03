@@ -32,6 +32,11 @@ resource "aws_iam_policy" "controller_policy" {
         ]
       },
       {
+        Effect : "Allow",
+        Action : ["ssm:GetParameter"],
+        Resource : ["arn:aws:ssm:*:*:parameter/aws/service/*"]
+      },
+      {
         Effect = "Allow",
         Action = [
           "ssm:GetParametersByPath"
@@ -62,6 +67,16 @@ resource "aws_iam_policy" "controller_policy" {
           "ec2:RunInstances",
           "ec2:CreateTags"
         ],
+        Resource = [
+          "arn:aws:ec2:us-east-1::image/ami-*",
+        ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "ec2:RunInstances",
+          "ec2:CreateTags"
+        ],
         Resource = "*",
         Condition = {
           ArnEquals = {
@@ -83,7 +98,7 @@ resource "aws_iam_policy" "controller_policy" {
       {
         Effect = "Allow",
         Action = [
-          "ec2:StopInstance",
+          "ec2:StopInstances",
           "ec2:StartInstances",
           "ec2:TerminateInstances",
         ],

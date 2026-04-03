@@ -61,3 +61,8 @@ output "controller_role_id" {
   description = "IAM Role ID for the controller"
   value       = aws_iam_role.controller_role.id
 }
+
+output "controller_config" {
+  value = module.config.controller_config
+  sensitive = true
+}

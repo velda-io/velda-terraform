@@ -31,7 +31,8 @@ locals {
   agent_version = var.agent_version != null ? var.agent_version : var.controller_output.agent_version
 }
 
-data "aws_ami" "velda_controller" {
+data "aws_ami" "velda_agent" {
+  count       = var.agent_ami != null ? 0 : 1
   most_recent = true
 
   filter {
@@ -49,7 +50,7 @@ data "aws_ami" "velda_controller" {
 
 resource "aws_launch_template" "agent" {
   name          = "${var.controller_output.name}-agent-${var.pool}"
-  image_id      = var.agent_ami != null ? var.agent_ami : data.aws_ami.velda_controller.id
+  image_id      = var.agent_ami != null ? var.agent_ami == "aws-ml" ? "" : var.agent_ami : data.aws_ami.velda_agent[0].id
   instance_type = var.instance_type
 
   network_interfaces {

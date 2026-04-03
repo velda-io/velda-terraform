@@ -23,6 +23,17 @@ locals {
       },
     ]
 
+    bootcmd = [<<-EOF
+      #!/bin/bash
+      # This is only used for upgrade, not for new setup.
+      if (command -v velda) && [ "$(velda version)" != "${var.controller_version}" ]; then
+        curl -fsSL -o /tmp/velda "https://releases.velda.io/velda-${var.controller_version}-linux-amd64"
+        chmod +x /tmp/velda
+        mv /tmp/velda /usr/bin/velda
+      fi
+      EOF
+    ]
+
     package_update  = true
     package_upgrade = false
     packages = concat([
@@ -67,7 +78,7 @@ locals {
         path        = "/tmp/velda-setup.sh"
         owner       = "root:root"
         permissions = "0755"
-        content     = file("${path.module}/../configs/setup-oss.sh")
+        content     = file("${path.module}/setup-oss.sh")
       },
     ], var.extra_cloud_init.write_files)
 
@@ -161,11 +172,6 @@ locals {
       app_domain    = try(var.enterprise_config.app_domain, null),
     })
   )
-
-  setup_configs = local.enable_enterprise ? jsonencode({
-    instance_id = var.name
-    zfs_disks   = var.zfs_disks
-  }) : ""
 
 }
 

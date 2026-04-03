@@ -44,7 +44,7 @@ variable "data_disk_type" {
 }
 
 variable "cloud_init" {
-  description = "Cloud-init configuration for the controller. Use config_full module to generate one."
+  description = "Cloud-init configuration for the controller. Use config module to generate one."
   type        = string
 }
 
