@@ -52,7 +52,7 @@ module "controller" {
   data_disk_size          = 100
   controller_machine_type = "t2.medium"
   // Check latest version from https://github.com/velda-io/velda/releases/
-  controller_version = "v1.1.2"
+  controller_version = "v1.1.4"
   external_access = {
     use_nat = false
   }
